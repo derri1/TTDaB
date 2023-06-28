@@ -1,5 +1,7 @@
 from pygame import *
 from random import randint
+import time
+from pygame.time import delay
 
 #Основ. окно игры
 win_width = 1000 #ширина
@@ -50,7 +52,7 @@ player = Player('player.png', 500, 680, 7, 80, 120)
 #Кирпичи летят
 bricks = sprite.Group()
 for i in range(1, 4):
-    brick = Brick('brick.png', randint(-5, win_width - 95), -140, randint(3, 6), 50, -40)
+    brick = Brick('brick.png', randint(-5, win_width - 95), -140, randint(3, 5), 50, -40)
     bricks.add(brick)
 
 #Текст
@@ -63,17 +65,17 @@ win = font1.render('GG!', True, (0, 180, 0))
 #Музыка и звуки
 mixer.init()
 mixer.music.load('background_music.mp3')
-mixer.music.play()
 hit_sound = mixer.Sound('hit.ogg')
 lose_sound = mixer.Sound('lose_sound.ogg')
 win_sound = mixer.Sound('win_sound.wav')
 
 #Цикл игры
+mixer.music.play() #это для запуска музыки
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
-
+    
     if not finish:
         window.blit(background,(0,0))
 
@@ -82,21 +84,19 @@ while run:
         window.blit(text, (10, 20))
 
         #Увеличение очков
-        if score <= 0:
-            clocks.add(chas)
         score += 1
 
-        #Кол-во жизней и поражение если жизней 0
+        #Поражение
         if life == 0:
             finish = True
-            window.blit(lose, (350, 340))
+            window.blit(lose, (400, 370))
             mixer.music.stop()
             lose_sound.play()
 
         #Выигрыш
-        if score >= 501:
+        if score >= 3001:
             finish = True
-            window.blit(win, (350, 340))
+            window.blit(win, (450, 370))
             mixer.music.stop()
             win_sound.play()
 
@@ -108,6 +108,7 @@ while run:
         if life == 1:
             life_color = (150, 0, 0)
     
+        #Показ жизней на экране
         text_life = font2.render('Кол-во жизей:' + str(life), 1, life_color)
         window.blit(text_life, (10, 45))
 
@@ -116,8 +117,8 @@ while run:
             sprite.spritecollide(player, bricks, True)
             hit_sound.play()
             life = life -1
-            for i in range(1, 4):
-                brick = Brick('brick.png', randint(-5, win_width - 95), -140, randint(3, 6), 50, -40)
+            for i in range(1, 2):
+                brick = Brick('brick.png', randint(-5, win_width - 95), -140, randint(3, 5), 50, -40)
                 bricks.add(brick)
 
         #Обновление игрока и кирпича
@@ -126,4 +127,19 @@ while run:
         bricks.update()
         bricks.draw(window)
         
-    display.update()
+        display.update()
+
+    #Автомат. перезагрузка
+    else:
+        finish = False
+        score = 0
+        life = 3
+        for m in bricks:
+            m.kill()
+              
+        for i in range(1, 4):
+            brick = Brick('brick.png', randint(-5, win_width - 95), -140, randint(3, 5), 50, -40)
+            bricks.add(brick)
+            
+        delay(3000)
+        mixer.music.play()
